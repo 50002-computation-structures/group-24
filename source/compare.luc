@@ -1,0 +1,22 @@
+module compare (
+    input z,
+    input v,
+    input n,
+    input alufn_signal[6],
+    output out[16] 
+  ){
+  sig alufn_sig[2];
+  always{
+    out = 16b0;
+    alufn_sig = alufn_signal[2:1];
+    case(alufn_sig){
+      // default: out[0] = 0;
+      //A=B
+      b01: out[0] = z;
+      //A<B
+      b10: out[0] = n ^ v;
+      //A<=B
+      b11: out[0] = z | (n ^ v);
+    }
+  }
+}

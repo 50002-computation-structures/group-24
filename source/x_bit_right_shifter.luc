@@ -1,0 +1,27 @@
+module x_bit_right_shifter #(
+    // parameter declaration, to be set during module instantiation
+    // default value given is 8
+    SHIFT = 8 : SHIFT > 0 & SHIFT < 17
+  )(
+    input a[16],
+    input shift,
+    input pad,
+    output out[16]
+  ) {
+  
+  
+  always {
+    case(shift){
+      b1:
+        if (SHIFT == 16){
+          out[15:16-SHIFT] = SHIFTx{pad};
+        }
+        else{
+          out[15-SHIFT:0] = a[15:SHIFT];
+          out[15:16-SHIFT] = SHIFTx{pad};
+        }
+      default:
+        out[15:0] = a[15:0];
+    }
+  }
+}
