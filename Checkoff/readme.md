@@ -6,13 +6,13 @@
 |1006887 | Manimoliyan Elankumuthan|
 |1007195 | Chan Wei Ping|
 |1007189 | Augustine Lim King Hwee|
-|1006965 | Tan Yi Xuan, Xavier|
+|1006965 | Tan Yi Xuan Xavier|
 |1006621 | Ng Yu Hueng|
 |1007144 | Priyanshi Saraogi|
 |1007114 | Jithin Bathula|
 
 
-16 bit ALU
+### 16 bit ALU
 
 Building a 16 bit Arithimetic Logic Unit using Lucid.
 
