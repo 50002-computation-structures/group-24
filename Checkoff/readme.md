@@ -29,6 +29,23 @@ Building a 16 bit Arithimetic Logic Unit using Lucid.
 2. 16 bit binary number B
 3. 6 bit binary number alufn
 
+ALUFN OPCODE:
+| Operation |	ALUFN[5:0] |
+|-----------|------------|
+|ADD|000000|
+|SUB|000001|
+|AND|011000|
+|OR|011110|
+|XOR|010110|
+|“A”|011010|
+|SHL|100000|
+|SHR|100001|
+|SRA|100011|
+|CMPEQ|110011|
+|CMPLT|110101|
+|CMPLE |110111|
+|MUL|100010|
+
 # Output of ALU:
 1. 1 bit boolean Z
 2. 1 bit boolean V
