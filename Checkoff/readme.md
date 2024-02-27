@@ -12,7 +12,7 @@
 |1007114 | Jithin Bathula|
 
 
-### 16 bit ALU
+# 16 bit ALU
 
 Building a 16 bit Arithimetic Logic Unit using Lucid.
 
@@ -24,7 +24,7 @@ Building a 16 bit Arithimetic Logic Unit using Lucid.
 5. Multiplier Unit
 6. Modulus Unit (Extra)
 
-# Input of ALU: 
+### Input of ALU: 
 1. 16 bit binary number A
 2. 16 bit binary number B
 3. 6 bit binary number alufn
@@ -46,7 +46,7 @@ ALUFN OPCODE:
 |CMPLE |110111|
 |MUL|100010|
 
-# Output of ALU:
+### Output of ALU:
 1. 1 bit boolean Z
 2. 1 bit boolean V
 3. 1 bit boolean N
@@ -76,9 +76,9 @@ ALUFN OPCODE:
 6. 7-segment[0:2] will show the z, v, n respectively. The led[0:1] will output the 16 bit binary output. led[2] will display the alufn.
 
 
-### Other Details
+# Other Details
 
-# Adder/Subtractor Unit:
+### Adder/Subtractor Unit:
 ```
 Either adds a to b or subtracts a from b depending on alufn[0]
 
@@ -98,7 +98,7 @@ v is true if there is an overflow during calculation
 n is true if sum is a negative number
 ```
 
-# Compare Unit:
+### Compare Unit:
 ```
 Checks if a is equal to, less than, less than or equal to b depending on alufn[2:1]
 
@@ -118,7 +118,7 @@ if (output of comparison is false):
     cmp[0] = 0
 ```
 
-# Boolean Unit:
+### Boolean Unit:
 ```
 Outputs boolean operations such as AND, OR, XOR, "A", on a and b
 
@@ -136,7 +136,7 @@ Operation   alufn[5:0]
   “A”         11010
 ```
 
-# Shifter Unit
+### Shifter Unit
 ```
 Outputs a after it has been shifted by b bits. The type of shift depends on alufn[1:0]
 
@@ -151,7 +151,7 @@ SHR (shift right)                           01
 SRA (shift right with sign extension)       11
 ```
 
-# Multiplier Unit
+### Multiplier Unit
 ```
 Performs a multiplication between 16-bit input a and b and outputs a 16-bit value.
 
@@ -164,7 +164,7 @@ mul is a 16-bit binary number
 mul = a * b
 ```
 
-# Modulus Unit
+### Modulus Unit
 ```
 Modulus is not part of the basic ALU and has been added as an additional feature. Outputs Modulus of a and b where they are both 16 bits inputs.
 
