@@ -1,0 +1,84 @@
+module au_top (
+    input clk,              // 100MHz clock
+    input rst_n,
+    input usb_rx,           // USB->Serial input
+    output usb_tx,          // USB->Serial output
+    input p1r,
+    input p2r,
+    //output p1score[7],
+    //output p2score[7],
+    output msps[3],
+    output io_led[3][8],
+    output p1_selection[3],
+    output p2_selection[3]
+    
+  ) {
+  
+  sig rst;  // reset signal
+  
+  .clk(clk){
+    .rst(rst){
+      miniBeta beta;
+      
+      
+    }
+  }
+  
+  .clk(clk) {
+    // The reset conditioner is used to synchronize the reset signal to the FPGA
+    // clock. This ensures the entire FPGA comes out of reset at the same time.
+    reset_conditioner reset_cond;
+    button_conditioner buttoncond_p1r;
+    edge_detector buttondetector_p1r(#RISE(1), #FALL(0)); //detect on rising edge only
+    button_conditioner buttoncond_p2r;
+    edge_detector buttondetector_p2r(#RISE(1), #FALL(0)); //detect on rising edge only
+    //button_conditioner buttoncond_p1he;
+    //edge_detector buttondetector_p1he(#RISE(1), #FALL(0)); //detect on rising edge only
+    //button_conditioner buttoncond_p2he;
+    //edge_detector buttondetector_p2he(#RISE(1), #FALL(0)); //detect on rising edge only
+    //button_conditioner buttoncond_p1ha;
+    //edge_detector buttondetector_p1ha(#RISE(1), #FALL(0)); //detect on rising edge only
+    //button_conditioner buttoncond_p2ha;
+    //edge_detector buttondetector_p2ha(#RISE(1), #FALL(0)); //detect on rising edge only
+    //miniBeta beta(.rst(rst));
+  }
+  
+  always {
+    reset_cond.in = ~rst_n; // input raw inverted reset signal
+    rst = reset_cond.out;   // conditioned reset
+    beta.p1he=0;
+    beta.p2he=0;
+    beta.p1ha=0;
+    beta.p2ha=0;
+    
+    usb_tx = usb_rx;        // loop serial port
+    
+    buttoncond_p1r.in = p1r;
+    buttondetector_p1r.in = buttoncond_p1r.out;
+    beta.p1r = buttondetector_p1r.out;
+    
+    buttoncond_p2r.in = p2r;
+    buttondetector_p2r.in = buttoncond_p2r.out;
+    beta.p2r = buttondetector_p2r.out;
+    
+    msps=beta.msps;
+    p1_selection = beta.p1_selection;
+    p2_selection = beta.p2_selection;
+    
+    
+    if (buttoncond_p1r.out==1 ){
+      io_led[0][0]=1;
+    }
+    else{
+      io_led[0][0]=0;
+    }
+    if (buttoncond_p2r.out==1){
+      io_led[0][1]=1;
+    }
+    else{
+      io_led[0][1]=0;
+    }
+    
+    io_led[0][2] = beta.debug[0][2];
+  }
+}

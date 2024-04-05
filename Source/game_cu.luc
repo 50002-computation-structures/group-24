@@ -1,0 +1,347 @@
+module game_cu (
+    input clk,  // clock
+    input rst,  // reset
+    input regfile_datain[16], //direct reading of regfile data from read_address_b
+    
+    input p1r, //P1 selection/ready button
+    input p2r, //P2 selection/ready button
+    
+    
+    output alufn[6],
+    output asel[3],
+    output bsel[3],
+    output wdsel[3],
+    output regfile_write_address[4],
+    output regfile_read_address_a[4],
+    output regfile_read_address_b[4],
+    output we_regfile,
+    //output decimal_counter_increase,
+    //output decimal_counter_rst,
+    //output debug[4]
+    
+    output debug_fsm[6],
+    output debug[3][8]
+  ) {
+  
+  .clk(clk){
+    counter slow_timer(#SIZE(1),#DIV(26), .rst(rst)); //half a reset_conditioner 22 actual speed
+    edge_detector incrementcounter(#RISE(1), #FALL(0));
+    
+    
+    
+    fsm game_fsm={
+      IDLE,
+      INC_COUNTER,
+      MOD_3,
+      PLUS1,
+      P1_7_SEG,
+      P2_7_SEG,
+      CHECK_READYBUTTONCOUNT_P1,
+      CHECK_READYBUTTONCOUNT_P2,
+      BRANCH_P1BUTTON,
+      BRANCH_P2BUTTON,
+      INCREASE_P1BUTTONCOUNT,
+      INCREASE_P2BUTTONCOUNT,
+      CHECK_P1_BUTTON_COUNT_EQUALS_2,
+      BRANCH_P1_BUTTON_COUNT_EQUALS_2,
+      CHECK_P2_BUTTON_COUNT_EQUALS_2,
+      BRANCH_P2_BUTTON_COUNT_EQUALS_2,
+      BRANCH_P1_SELECTION,
+      P1_SELECTION_REG,
+      BRANCH_P2_SELECTION,
+      P2_SELECTION_REG,
+      CHECK_P1P2_BUTTON_COUNT,
+      BRANCH_CHECK_P1P2_BUTTON_COUNT,
+      CHECK_P1BUTTON_COUNT_MORETHAN_1,
+      BRANCH_CHECK_P1BUTTON_COUNT_MORETHAN_1,
+      CHECK_P1BUTTON_COUNT_EQUALS_2,
+      BRANCH_P1BUTTON_COUNT_EQUALS_2,
+      RESET_INC_COUNTER,
+      RESET_LED,
+      CHECK_DRAW,
+      BRANCH_DRAW,
+      DRAW,
+      CHECK_WINNER,
+      BRANCH_WINNER,
+      P1_HAMMER,
+      P2_HELMET,
+      P2_HAMMER,
+      P1_HELMET,
+      INCREASE_SCORE_P1,
+      INCREASE_SCORE_P2,
+      RESET_P1_BUTTON_COUNT,
+      RESET_P2_BUTTON_COUNT,
+      CHECK_P1_SCORE_EQUALS_2,
+      BRANCH_CHECK_P1_SCORE_EQUALS_2,
+      CHECK_P2_SCORE_EQUALS_2,
+      BRANCH_CHECK_P2_SCORE_EQUALS_2,
+      GAMEOVER
+    };
+    
+    
+  }
+  
+  always {
+    
+    debug_fsm = game_fsm.q;
+    // standard setting unless otherwise overwritten by each case
+    alufn = 0;
+    asel = 0;
+    bsel = 0;
+    we_regfile = 0;
+    regfile_write_address = 1111;
+    regfile_read_address_a = 0000;
+    regfile_read_address_b = 0000;
+    wdsel = 0;
+    debug[0][2] = 0;
+    incrementcounter.in = slow_timer.value;
+    
+    game_fsm.d = game_fsm.IDLE;
+    if (rst){
+      game_fsm.d = game_fsm.IDLE;
+    }
+    else{
+      
+      case(game_fsm.q){
+        
+        game_fsm.INC_COUNTER:
+          alufn = b000000;                             //ADD
+          regfile_read_address_a = b1000;              //counter reg
+          bsel = b01;                                  //constant 1
+          asel = b00;
+          we_regfile = 1;
+          regfile_write_address = b1000;                     //counter reg
+          game_fsm.d = game_fsm.MOD_3;
+        
+        game_fsm.MOD_3:
+          alufn = b100000;                           //Mod
+          regfile_read_address_a = b1000;            // read from inc counter
+          bsel = b11;
+          asel = b00;
+          we_regfile = 1;
+          regfile_write_address = b1001;             // write into mod reg
+          game_fsm.d = game_fsm.PLUS1;
+        
+        game_fsm.PLUS1:
+          alufn = b000000;
+          regfile_read_address_a = b1001;
+          bsel= b01;
+          asel = b00;
+          we_regfile = 1;
+          regfile_write_address = b1011;
+          game_fsm.d = game_fsm.IDLE;
+        
+        
+        game_fsm.CHECK_READYBUTTONCOUNT_P1:
+          alufn = b110101;                             //CMPLT
+          regfile_read_address_a = b0000;              //p1 button count reg
+          bsel = b10;                                  //constant 3
+          asel = b00;
+          wdsel = b00;
+          we_regfile = 1;
+          regfile_write_address = b1111;                     //temp reg
+          game_fsm.d = game_fsm.BRANCH_P1BUTTON;
+        
+        game_fsm.BRANCH_P1BUTTON:
+          regfile_read_address_b = b1111;              //temp reg
+          if (regfile_datain[0]){                      //direct read in
+            game_fsm.d = game_fsm.INCREASE_P1BUTTONCOUNT;  //if true inc p1 button count
+          }
+          else{
+            game_fsm.d = game_fsm.IDLE;                   // else go back to idle
+          }
+        
+        game_fsm.INCREASE_P1BUTTONCOUNT:
+          alufn = b000000;                           //ADD
+          regfile_read_address_a = b0000;            //P1 button count reg
+          bsel = b01;                                //constant 1
+          asel = b00;
+          wdsel = b00;                                //P1 button count reg
+          we_regfile = 1;
+          regfile_write_address = b0000;                   //P1 button reg
+          game_fsm.d = game_fsm.CHECK_P1_BUTTON_COUNT_EQUALS_2;
+        
+        game_fsm.CHECK_P1_BUTTON_COUNT_EQUALS_2:
+          alufn = b110011;                           //COMPEQ
+          regfile_read_address_a = b0000;            //P1 button count
+          bsel = b10;                                //constant 2
+          asel = b00;
+          wdsel = b00;                                //P1 button count reg
+          we_regfile = 1;
+          regfile_write_address = b1111;                   //P1 button count
+          game_fsm.d = game_fsm.BRANCH_P1_BUTTON_COUNT_EQUALS_2;
+        
+        game_fsm.BRANCH_P1_BUTTON_COUNT_EQUALS_2:
+          regfile_read_address_b = b1111;
+          if (regfile_datain[0] == 0) {
+            game_fsm.d = game_fsm.CHECK_P1P2_BUTTON_COUNT;
+          }
+          else {
+            game_fsm.d = game_fsm.P1_SELECTION_REG;
+          }
+        
+        game_fsm.CHECK_READYBUTTONCOUNT_P2:
+          debug[0][0] = 2;
+          alufn = b110101;                             //CMPLT
+          regfile_read_address_a = b0001;              //p1 button count reg
+          bsel = b10;                                  //constant 3
+          asel = b00;
+          wdsel = b00;
+          we_regfile = 1;
+          regfile_write_address = b1111;                     //temp reg
+          game_fsm.d = game_fsm.BRANCH_P2BUTTON;
+        
+        game_fsm.BRANCH_P2BUTTON:
+          regfile_read_address_b = b1111;              //temp reg
+          if (regfile_datain[0]){                      //direct read in
+            game_fsm.d = game_fsm.INCREASE_P2BUTTONCOUNT;  //if true inc p1 button count
+          }
+          else{
+            game_fsm.d = game_fsm.IDLE;                   // else go back to idle
+          }
+        
+        game_fsm.INCREASE_P2BUTTONCOUNT:
+          alufn = b000000;                           //ADD
+          regfile_read_address_a = b0001;            //P1 button count reg
+          
+          bsel = b01;                                //constant 1
+          asel = b00;
+          wdsel = b00;                                //P1 button count reg
+          we_regfile = 1;
+          regfile_write_address = b0001;                   //P1 button reg
+          game_fsm.d = game_fsm.CHECK_P2_BUTTON_COUNT_EQUALS_2;
+        
+        game_fsm.CHECK_P2_BUTTON_COUNT_EQUALS_2:
+          alufn = b110011;                           //COMPEQ
+          regfile_read_address_a = b0001;            //P1 button count
+          bsel = b10;                                //constant 2
+          asel = b00;
+          wdsel = b00;                                //P1 button count reg
+          we_regfile = 1;
+          regfile_write_address = b1111;                   //P1 button count
+          game_fsm.d = game_fsm.BRANCH_P2_BUTTON_COUNT_EQUALS_2;
+        
+        game_fsm.BRANCH_P2_BUTTON_COUNT_EQUALS_2:
+          regfile_read_address_b = b1111;
+          if (regfile_datain[0] == 0) {
+            game_fsm.d = game_fsm.CHECK_P1P2_BUTTON_COUNT;
+          }
+          else {
+            game_fsm.d = game_fsm.P2_SELECTION_REG;
+          }
+        
+        game_fsm.P1_SELECTION_REG:
+          alufn = b011010;                       //A
+          regfile_read_address_a = b1011;        // Read from mod reg
+          asel = b00;
+          bsel = b01;
+          wdsel = b00;                            // constant 1
+          we_regfile = 1;
+          regfile_write_address = b0010;         // P1 selection reg
+          game_fsm.d = game_fsm.CHECK_P1P2_BUTTON_COUNT;
+        
+        game_fsm.P2_SELECTION_REG:
+          alufn = b011010;                      //A
+          regfile_read_address_a = b1011;       // Read from mod reg
+          asel = b00;
+          bsel = b01;
+          wdsel = b00;                           // constant 1
+          we_regfile = 1;
+          regfile_write_address = b0011;        // P2 selection reg
+          game_fsm.d = game_fsm.CHECK_P1P2_BUTTON_COUNT;
+        
+        game_fsm.CHECK_P1P2_BUTTON_COUNT:
+          alufn = b110011;                           //COMPEQ
+          regfile_read_address_a = b0001;           //P1 button count
+          regfile_read_address_b = b0000;
+          bsel = b00;                                //constant 2
+          asel = b00;
+          wdsel = b00;                                //P1 button count reg
+          we_regfile = 1;
+          regfile_write_address = b1111;                   //P1 button count
+          game_fsm.d = game_fsm.BRANCH_CHECK_P1P2_BUTTON_COUNT;
+        
+        game_fsm.BRANCH_CHECK_P1P2_BUTTON_COUNT:
+          regfile_read_address_b = b1111;
+          if (regfile_datain[0]) {
+            game_fsm.d = game_fsm.CHECK_P1BUTTON_COUNT_MORETHAN_1;
+          }
+          else {
+            game_fsm.d = game_fsm.IDLE;
+          }
+        
+        game_fsm.CHECK_P1BUTTON_COUNT_MORETHAN_1:
+          alufn = b110111;
+          regfile_read_address_a = b0000;
+          asel = b00;
+          bsel = b01;
+          wdsel = b00;
+          we_regfile = 1;
+          regfile_write_address = b1010;
+          game_fsm.d = game_fsm.BRANCH_CHECK_P1BUTTON_COUNT_MORETHAN_1;
+        
+        game_fsm.BRANCH_CHECK_P1BUTTON_COUNT_MORETHAN_1:
+          regfile_read_address_b = b1010;
+          if (regfile_datain[0]) {
+            game_fsm.d = game_fsm.CHECK_P1BUTTON_COUNT_EQUALS_2;
+          }
+          else {
+            game_fsm.d = game_fsm.IDLE;
+          }
+        
+        game_fsm.CHECK_P1BUTTON_COUNT_EQUALS_2:
+          alufn = b110011;
+          regfile_read_address_a = b0000;
+          asel = b00;
+          bsel = b10;
+          regfile_write_address = b1111;
+          we_regfile = 1;
+          wdsel = b00;
+          game_fsm.d = game_fsm.BRANCH_P1BUTTON_COUNT_EQUALS_2;
+        
+        game_fsm.BRANCH_P1BUTTON_COUNT_EQUALS_2:
+          regfile_read_address_b = b1111;
+          if (regfile_datain[0] == 1) {
+            game_fsm.d = game_fsm.RESET_LED;
+          }
+          else {
+            game_fsm.d = game_fsm.IDLE;
+          }
+        
+        game_fsm.RESET_LED:
+          we_regfile = 1;
+          regfile_write_address = b1010;
+          wdsel = b01;
+          game_fsm.d = game_fsm.RESET_INC_COUNTER;
+        
+        game_fsm.RESET_INC_COUNTER:
+          we_regfile = 1;
+          regfile_write_address = b1011;
+          wdsel = b01;
+          game_fsm.d = game_fsm.IDLE;
+        
+        
+        
+        game_fsm.IDLE:
+          regfile_read_address_b = b1010;
+          if (p1r && ~p2r){
+            game_fsm.d = game_fsm.CHECK_READYBUTTONCOUNT_P1;
+          }
+          if (p2r && ~p1r) {
+            game_fsm.d = game_fsm.CHECK_READYBUTTONCOUNT_P2;
+          }
+          if (regfile_datain == b1 && incrementcounter.out && ~p1r && ~p2r) {
+            game_fsm.d = game_fsm.INC_COUNTER;
+          }
+          if (regfile_datain == b10) {
+            game_fsm.d = game_fsm.CHECK_P1_SCORE_EQUALS_2;
+          }
+        //else {
+        //game_fsm.d = game_fsm.P1_7_SEG;
+        
+        
+        
+        //}
+      }
+    }
+}

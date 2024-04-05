@@ -1,0 +1,22 @@
+module rpsw (
+    input a,
+    input b,
+    input c,
+    input d,
+    output out[2] 
+  ){
+    sig not_a, not_b, not_c, not_d;
+    sig e, f;
+  
+  always{
+    not_a = ~a;
+    not_b = ~b;
+    not_c = ~c;
+    not_d = ~d;
+    e = ((not_a & b & c & not_d) | (a & not_b & c & d) | (a & b & not_c & d));
+    f = ((not_a & b & b & d) | (a & not_b & not_c & d) | (a & b & c & not_d));
+
+      out[0] = e;
+      out[1] = f;
+    }
+  }

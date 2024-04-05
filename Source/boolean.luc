@@ -1,0 +1,28 @@
+module boolean (
+    input a[16],
+    input b[16],
+    input alufn_signal[6],
+    output out[16]
+  ) {
+
+  
+  always {
+
+    case(alufn_signal[3:0]){
+    
+      4b1000: out = a & b;     
+      4b1110: out = a | b;     
+      4b0110: out = a ^ b;
+      4b1010: out = a;
+      4b1100: out = b;
+      4b0101: out = ~a;    //NOT a
+      4b0011: out = ~b;    //NOT b
+      4b0001: out = ~(a | b); //NOR
+      4b1001: out = ~(a ^ b); //XNOR
+      4b0111: out = ~(a & b); //NAND	
+      default:
+        out = b0000000000000000;
+    }
+   
+  }
+}
