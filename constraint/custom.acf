@@ -1,0 +1,34 @@
+pin clk CLOCK;
+clock clk 100MHz;
+
+pin rst_n RESET;
+
+pin p1r C11 pulldown;
+pin p2r C8 pulldown;
+pin p2ha C28 pulldown;
+pin p2he C31 pulldown;
+pin p1ha C34 pulldown;
+pin p1he C37 pulldown;
+
+pin io_led[0][0] B21;
+pin io_led[0][1] B20;
+pin io_led[0][2] B19;
+pin io_led[0][3] B18;
+// main 3 leds
+pin msps[0] A27; 
+pin msps[1] A30;
+pin msps[2] A33;
+
+// p1 leds
+pin p1_selection[0] A20;
+pin p1_selection[1] A17;
+pin p1_selection[2] A14;
+// p2 leds
+pin p2_selection[0] A21;
+pin p2_selection[1] A18;
+pin p2_selection[2] A15;
+
+
+// 23
+// 31
+// 34
