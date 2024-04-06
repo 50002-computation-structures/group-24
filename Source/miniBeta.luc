@@ -1,0 +1,150 @@
+module miniBeta (
+    
+    input clk, //clock
+    input rst,  // reset
+    input p1r, //P1 selection/ready button
+    input p2r, //P2 selection/ready button
+    input p1ha, //P1 hammer button
+    input p2ha, //P2 hammer button
+    input p2he, //P2 helmet button
+    input p1he, //P1 helmet button
+    output alufn_address[6], // display what aluFN it is running currently
+    output p1scoredisplay[7], //P1 score seven segment display output
+    output p2scoredisplay[7], //P1 score seven segment display output
+    output p1_selection[3],
+    output p2_selection[3],
+    output msps[3],
+    output debug[3][8]
+    //output debug[8]
+    
+  ) {
+  
+  //temp variables
+  sig inputAlu_a[16];
+  sig inputAlu_b[16];
+  
+  alu game_alu;
+  seven_seg seven_seg_p1;
+  seven_seg seven_seg_p2;
+  
+  
+  .clk(clk){
+    .rst(rst){
+      game_cu game_controlunit;
+      miniRegfiles players;
+      //multi_seven_seg debug7seg;
+    }
+  }
+  always {
+    //pass button press signal to CU unit
+    game_controlunit.p1r = p1r;
+    game_controlunit.p2r= p2r;
+    game_controlunit.p1ha = p1ha;
+    game_controlunit.p1he = p1he;
+    game_controlunit.p2ha = p2ha;
+    game_controlunit.p2he = p2he;
+    p1_selection=0;
+    p2_selection=0;
+    
+    //output of CU to increase 7segment
+    
+    //Setup REGFILE unit
+    players.we = game_controlunit.we_regfile;
+    players.write_address = game_controlunit.regfile_write_address;
+    
+    players.read_address_a = game_controlunit.regfile_read_address_a;
+    players.read_address_b = game_controlunit.regfile_read_address_b;
+    
+    //bootstrap reg_b output to CU for convenient branching conditions
+    game_controlunit.regfile_datain = players.out_b;
+    
+    //asel mux
+    case(game_controlunit.asel){
+      b00  : inputAlu_a = players.out_a;
+      default : //b10 unused
+        inputAlu_a = 0;
+    }
+    
+    //bsel mux
+    case(game_controlunit.bsel){
+      b00 : inputAlu_b = players.out_b;
+      b01 : inputAlu_b = 1;
+      b11 : inputAlu_b = 3;
+      b10 : inputAlu_b = 2;
+      default: //necessary to init
+        inputAlu_b = 0;
+      
+    }
+    
+    //ALU
+    game_alu.a = inputAlu_a;
+    game_alu.b = inputAlu_b;
+    game_alu.alufn_signal = game_controlunit.alufn;
+    
+    
+    //wdsel mux
+    case (game_controlunit.wdsel){
+      b01 : players.data = 0;
+      b10 : players.data = b0000000000000001;
+      b11 : players.data = b0000000000000010;
+      default : //b00
+        players.data = game_alu.out;
+    }
+    
+    alufn_address = game_controlunit.alufn;
+    seven_seg_p1.char = players.p1display;
+    seven_seg_p2.char = players.p2display;
+    p1scoredisplay = seven_seg_p1.segs;
+    p2scoredisplay = seven_seg_p2.segs;
+    debug[0][2] = game_controlunit.debug[0][2];
+    
+    
+    case(players.msps) {
+      b01:
+        msps = b001;
+      b10:
+        msps = b010;
+      b11:
+        msps = b100;
+      default:
+        msps = b000;
+    }
+    
+    case(players.p1_selection) {
+      // scissors
+      b01:
+        p1_selection = b001;
+      // paper
+      b10:
+        p1_selection = b010;
+      // stone
+      b11:
+        p1_selection = b100;
+      default:
+        p1_selection = b000;
+    }
+    
+    case(players.p2_selection) {
+      // scissors
+      b01:
+        p2_selection = b001;
+      // paper
+      b10:
+        p2_selection = b010;
+      // stone
+      b11:
+        p2_selection = b100;
+      default:
+        p2_selection = b000;
+    }
+    
+    //debug7seg.values = game_controlunit.debug;
+    //debug = debug7seg.seg;
+    
+    
+    
+    
+    
+    
+  }
+}

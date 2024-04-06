@@ -1,0 +1,17 @@
+module compare (
+    input a[16],
+    input b[16],
+    input alufn_signal[6],
+    output out[16]
+  ) {
+  
+  always {
+    out = 16b0;
+    case (alufn_signal) {
+      default: out[0] = 0;
+      b110011: out[0] = a == b;
+      b110101: out[0] = a < b;
+      b110111: out[0] = a >= b;
+    }
+  }
+}

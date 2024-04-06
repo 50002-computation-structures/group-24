@@ -1,0 +1,76 @@
+module alu (
+    input a[16],
+    input b[16],
+    input alufn_signal[6],
+    output out[16],
+    output zvn[3]
+  ) {
+  
+  adder adderUnit;
+  boolean booleanUnit;
+  compare compareUnit;
+  modulus modulus;
+  rpsw rpsw;
+  
+  sig z;
+  sig v;
+  sig n;
+  sig k[16], r[16], l[16];
+  
+  
+  always {
+    // adder block
+    adderUnit.alufn_signal = alufn_signal;
+    adderUnit.a = a;
+    adderUnit.b = b;
+    
+    z = adderUnit.z;
+    v = adderUnit.v;
+    n = adderUnit.n;
+    
+    zvn[0] = z;
+    zvn[1] = v;
+    zvn[2] = n;
+    
+    // compare block
+    compareUnit.alufn_signal = alufn_signal;
+    compareUnit.a = a;
+    compareUnit.b = b;
+    
+    booleanUnit.alufn_signal = alufn_signal;
+    booleanUnit.a = a;
+    booleanUnit.b = b;
+    
+    // modulus block
+    modulus.a = a;
+    
+    //rpsw Block
+    rpsw.a = a[0];
+    rpsw.b = a[1];
+    rpsw.c = b[0];
+    rpsw.d = b[1];
+    
+    //  case(alufn_signal[5:4]){
+    //     b00 : k = adderUnit.out;
+    //     b01 : k = booleanUnit.out;
+    //     b11 : k = compareUnit.out;
+    //     b10 : k = modulus.out;
+    //    default: k = 16b0;
+    //    }
+    
+    r = 16b0;
+    
+    case(alufn_signal[5:4]){
+      b00 : k = adderUnit.out;
+      b01 : k = booleanUnit.out;
+      b11 : k = compareUnit.out;
+      b10 : k = modulus.out;
+      default: k = 16b0;
+    }
+    case(alufn_signal){
+      b001000 : l = rpsw.out;
+      default: l = k;
+    }
+    
+    out = l;
+}
