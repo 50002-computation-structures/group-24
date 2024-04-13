@@ -144,13 +144,6 @@ module miniBeta (
         p2_selection = b000;
     }
     
-    //debug7seg.values = game_controlunit.debug;
-    //debug = debug7seg.seg;
-    
-    
-    
-    
-    
     
   }
 }
