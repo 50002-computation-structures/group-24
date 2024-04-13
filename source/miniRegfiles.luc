@@ -17,11 +17,6 @@ module miniRegfiles (
     output p2_selection[2],
     output msps[2]
     
-    //debug
-    //output timer[16],
-    //output all_scores[32],
-    //output all_buttons[4],
-    //output counter_out[16]
     
   )
   
@@ -38,7 +33,6 @@ module miniRegfiles (
       dff p2scorereg[2](#INIT(0), .clk(clk), .rst(rst)); // P2 score output led
       dff inc_counterreg[16] (#INIT(0), .clk(clk), .rst(rst)); //store the current count
       dff modreg[2] (#INIT(0), .clk(clk), .rst(rst)); //store which led to light up
-      //dff alufnreg[6](#INIT(0), .clk(clk), .rst(rst)); // store 6 bit alufn
       dff ledstart[16] (#INIT(0), .clk(clk), .rst(rst)); // when to start the main led
       dff temp_var[16] (#INIT(0));
       dff plus1reg[16] (#INIT(0));
@@ -109,12 +103,5 @@ module miniRegfiles (
     p2_selection = p2selectionreg.q;
     msps = plus1reg.q;
     
-    //For debugging
-    //all_scores[15:0] = p1_score.q;
-    //all_scores[31:16] = p2_score.q;
-    //all_buttons[1:0] = p1_buttonPress.q[1:0];
-    //all_buttons[3:2] = p2_buttonPress.q[1:0];
-    //timer = current_timer.q;
-    //counter_out = current_counter.q;
   }
 }
