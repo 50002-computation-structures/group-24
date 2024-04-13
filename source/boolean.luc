@@ -13,7 +13,7 @@ module boolean (
       4b1000: out = a & b;     
       4b1110: out = a | b;     
       4b0110: out = a ^ b;
-      4b1010: out = a;
+      4b1010: out = a; // A
       4b1100: out = b;
       4b0101: out = ~a;    //NOT a
       4b0011: out = ~b;    //NOT b
