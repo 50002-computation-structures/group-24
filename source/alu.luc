@@ -50,14 +50,6 @@ module alu (
     rpsw.c = b[0];
     rpsw.d = b[1];
     
-    //  case(alufn_signal[5:4]){
-    //     b00 : k = adderUnit.out;
-    //     b01 : k = booleanUnit.out;
-    //     b11 : k = compareUnit.out;
-    //     b10 : k = modulus.out;
-    //    default: k = 16b0;
-    //    }
-    
     r = 16b0;
     
     case(alufn_signal[5:4]){
