@@ -61,9 +61,7 @@ module game_cu (
       RESET_P2_SEL,
       CHECK_WINNER,
       BRANCH_WINNER,
-      P1_HAMMER,
       P2_HELMET,
-      P2_HAMMER,
       P1_HELMET,
       INCREASE_SCORE_P1,
       INCREASE_SCORE_P2,
@@ -368,7 +366,7 @@ module game_cu (
           game_fsm.d = game_fsm.CHECK_P1BUTTON_COUNT_MORETHAN_1;
         
         game_fsm.CHECK_WINNER:
-          alufn = b001000;
+          alufn = b001100;
           asel = b00;
           bsel = b00;
           we_regfile = 1;
