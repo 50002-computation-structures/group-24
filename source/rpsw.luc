@@ -14,7 +14,7 @@ module rpsw (
     not_c = ~c;
     not_d = ~d;
     e = ((not_a & b & c & not_d) | (a & not_b & c & d) | (a & b & not_c & d));
-    f = ((not_a & b & b & d) | (a & not_b & not_c & d) | (a & b & c & not_d));
+    f = ((not_a & b & c & d) | (a & not_b & not_c & d) | (a & b & c & not_d));
 
       out[0] = e;
       out[1] = f;
