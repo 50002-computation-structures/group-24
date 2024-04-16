@@ -1,0 +1,17 @@
+module fa (
+    input a,
+    input b,
+    input cin,
+    output s,
+    output cout
+  ) {
+  sig i, j, k;
+
+  always {
+    i = a ^ b;
+    j = a & b;
+    k = i & cin;
+    s = i ^ cin;
+    cout = j | k; 
+  }
+}

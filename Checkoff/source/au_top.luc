@@ -1,0 +1,54 @@
+module au_top (
+    input clk,              // 100MHz clock
+    input rst_n,            // reset button (active low)
+    output led [8],         // 8 user controllable LEDs
+    input usb_rx,           // USB->Serial input
+    output usb_tx,          // USB->Serial output
+    output io_led [3][8],   // LEDs on IO Shield
+    output io_seg [8],      // 7-segment LEDs on IO Shield (ANODE)
+    output io_sel [4],      // Digit select on IO Shield
+    input io_button [5],    // 5 buttons on IO Shield
+    input io_dip [3][8]     // DIP switches on IO Shield
+  ) {
+  
+  sig rst;                  // reset signal
+                
+
+  .clk(clk) {
+    // The reset conditioner is used to synchronize the reset signal to the FPGA
+    // clock. This ensures the entire FPGA comes out of reset at the same time.
+    reset_conditioner reset_cond;
+    // dffs to store values of a, b, and alufn to be fed to the alu 
+    dff a[16](.rst(rst));
+    dff b[16](.rst(rst));
+    dff alufn[6](.rst(rst));
+    button_conditioner buttoncond[4]; // this is to debounce the button signals
+    edge_detector buttondetector[4](#RISE(1), #FALL(0)); //detect on rising edge only;
+    .rst(rst) {
+      multi_seven_seg seg;
+      fsm_alu fsm_alu; 
+
+    }
+ }
+  
+  always {
+    reset_cond.in = ~rst_n;   // input raw inverted reset signal
+    rst = reset_cond.out;     // conditioned reset
+    
+    usb_tx = usb_rx;          // loop serial port
+    led= 8b00; 
+    
+    buttoncond.in = io_button[3:0]; //includes left 3 and right 4 
+    buttondetector.in= buttoncond.out;
+    fsm_alu.button = buttondetector.out; 
+    fsm_alu.in = io_dip; 
+    
+    io_led[0]= fsm_alu.outLED[7:0]; //lower 8 bits to led[0] unit 
+    io_led[1]= fsm_alu.outLED[15:8]; //higher 8 bits to led[1] unit
+    io_led[2][5:0]= fsm_alu.alufn_address_led; //next 6 bits to alufn/address acc to manual/tester mode
+    seg.values = fsm_alu.ledisplay; //7 segment display 
+    
+    io_seg = ~seg.seg; // connect segments to the driver
+    io_sel = ~seg.sel; // connect digit select to the driver   
+  }
+}
