@@ -59,8 +59,8 @@ module alu (
       b10 : k = modulus.out;
       default: k = 16b0;
     }
-    case(alufn_signal){
-      b001000 : l = rpsw.out;
+    case(alufn_signal[3:2]){
+      b11 : l = rpsw.out;
       default: l = k;
     }
     
